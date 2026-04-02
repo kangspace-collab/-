@@ -1,12 +1,12 @@
 import { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Settings, X, ChevronRight, ChevronLeft, Plus, Trash2, Loader2 } from 'lucide-react';
-import { BACKGROUND_COLORS } from './constants';
+import { BACKGROUND_COLORS, DEFAULT_VERSES } from './constants';
 import { AppSettings, BibleVerse, UpdateInterval } from './types';
 
 export default function App() {
   const [time, setTime] = useState(new Date());
-  const [fileVerses, setFileVerses] = useState<BibleVerse[]>([]);
+  const [fileVerses, setFileVerses] = useState<BibleVerse[]>(DEFAULT_VERSES);
   const [isLoading, setIsLoading] = useState(true);
   const [showSettings, setShowSettings] = useState(false);
   const [newVerseText, setNewVerseText] = useState('');

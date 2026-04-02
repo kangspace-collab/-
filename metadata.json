@@ -1,0 +1,5 @@
+{
+  "name": "Bible Verse Clock",
+  "description": "A minimalist clock that displays comforting Bible verses every 1 or 5 minutes with customizable background colors.",
+  "requestFramePermissions": []
+}

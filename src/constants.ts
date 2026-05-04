@@ -1,6 +1,6 @@
 import { BibleVerse } from './types';
 
-import { BibleVerse } from './types';
+import { BibleVerse, ThemeType } from './types';
 
 export const DEFAULT_VERSES: BibleVerse[] = [
   { "text": "여호와는 나의 목자시니 내게 부족함이 없으리로다", "reference": "시편 23:1" },
@@ -18,4 +18,64 @@ export const BACKGROUND_COLORS = [
   { name: 'Burgundy', value: '#450a0a', text: '#ffffff' },
   { name: 'White', value: '#ffffff', text: '#000000' },
   { name: 'Cream', value: '#fffbeb', text: '#1a1a1a' },
+];
+
+export interface ThemeConfig {
+  id: ThemeType;
+  name: string;
+  image: string;
+  textColor: string;
+  overlay: string;
+}
+
+export const THEMES: ThemeConfig[] = [
+  {
+    id: 'classic',
+    name: '클래식',
+    image: '',
+    textColor: '#ffffff',
+    overlay: 'rgba(0,0,0,0)'
+  },
+  {
+    id: 'spring',
+    name: '봄 (벚꽃)',
+    image: 'https://images.unsplash.com/photo-1522383225653-ed111181a951?auto=format&fit=crop&q=80&w=1920',
+    textColor: '#ffffff',
+    overlay: 'rgba(0,0,0,0.3)'
+  },
+  {
+    id: 'summer',
+    name: '여름 (바다)',
+    image: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&q=80&w=1920',
+    textColor: '#ffffff',
+    overlay: 'rgba(0,0,0,0.2)'
+  },
+  {
+    id: 'autumn',
+    name: '가을 (단풍)',
+    image: 'https://images.unsplash.com/photo-1507181179506-39f5d8480403?auto=format&fit=crop&q=80&w=1920',
+    textColor: '#ffffff',
+    overlay: 'rgba(0,0,0,0.3)'
+  },
+  {
+    id: 'winter',
+    name: '겨울 (눈)',
+    image: 'https://images.unsplash.com/photo-1418985991508-e47376b99a8a?auto=format&fit=crop&q=80&w=1920',
+    textColor: '#ffffff',
+    overlay: 'rgba(0,0,0,0.3)'
+  },
+  {
+    id: 'rain',
+    name: '비 오는 날',
+    image: 'https://images.unsplash.com/photo-1515694346937-94d85e41e6f0?auto=format&fit=crop&q=80&w=1920',
+    textColor: '#ffffff',
+    overlay: 'rgba(0,0,0,0.4)'
+  },
+  {
+    id: 'forest',
+    name: '숲속의 햇살',
+    image: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&q=80&w=1920',
+    textColor: '#ffffff',
+    overlay: 'rgba(0,0,0,0.2)'
+  }
 ];

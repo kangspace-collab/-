@@ -1,8 +1,9 @@
 import { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Settings, X, ChevronRight, ChevronLeft, Plus, Trash2, Loader2 } from 'lucide-react';
-import { BACKGROUND_COLORS, DEFAULT_VERSES } from './constants';
-import { AppSettings, BibleVerse, UpdateInterval } from './types';
+import { Settings, X, ChevronRight, ChevronLeft, Plus, Trash2, Loader2, Palette } from 'lucide-react';
+import { BACKGROUND_COLORS, DEFAULT_VERSES, THEMES } from './constants';
+import { AppSettings, BibleVerse, UpdateInterval, ThemeType } from './types';
+import BackgroundEffect from './components/BackgroundEffect';
 
 export default function App() {
   const [time, setTime] = useState(new Date());
@@ -16,8 +17,9 @@ export default function App() {
     const defaultSettings: AppSettings = {
       backgroundColor: BACKGROUND_COLORS[0].value,
       textColor: BACKGROUND_COLORS[0].text,
-      interval: 1, // Default to 1 minute as requested
+      interval: 1,
       customVerses: [],
+      theme: 'forest', // 기본 테마를 'forest'로 변경
     };
 
     const saved = localStorage.getItem('bible-clock-settings');
@@ -67,13 +69,10 @@ export default function App() {
     return () => clearInterval(timer);
   }, []);
 
-  // Calculate verse index based on current time (hour * 60 + minute)
-  // This ensures a unique verse every minute if there are 1440 verses.
+  // Calculate verse index based on current time
   const verseIndex = useMemo(() => {
     if (allVerses.length === 0) return 0;
     const totalMinutes = time.getHours() * 60 + time.getMinutes();
-    
-    // If interval is 5, we change every 5 minutes
     const intervalIndex = Math.floor(totalMinutes / settings.interval);
     return intervalIndex % allVerses.length;
   }, [time, allVerses.length, settings.interval]);
@@ -114,6 +113,8 @@ export default function App() {
     updateSettings({ customVerses: newCustom });
   };
 
+  const currentTheme = THEMES.find(t => t.id === settings.theme) || THEMES[0];
+
   if (isLoading) {
     return (
       <div className="min-h-screen w-full flex items-center justify-center bg-black text-white">
@@ -124,14 +125,36 @@ export default function App() {
 
   return (
     <div 
-      className="min-h-screen w-full flex items-center justify-center transition-colors duration-700 overflow-hidden relative p-4 md:p-8"
-      style={{ backgroundColor: settings.backgroundColor, color: settings.textColor }}
+      className="min-h-screen w-full flex items-center justify-center transition-all duration-1000 overflow-hidden relative p-4 md:p-8"
+      style={{ 
+        backgroundColor: settings.theme === 'classic' ? settings.backgroundColor : 'transparent',
+        color: currentTheme.textColor 
+      }}
     >
+      {/* Background Image Layer */}
+      {settings.theme !== 'classic' && (
+        <div className="fixed inset-0 z-[-2]">
+          <img 
+            src={currentTheme.image} 
+            className="w-full h-full object-cover" 
+            alt="background"
+            referrerPolicy="no-referrer"
+          />
+          <div 
+            className="absolute inset-0" 
+            style={{ backgroundColor: currentTheme.overlay }}
+          />
+        </div>
+      )}
+
+      {/* Background Particle Effects */}
+      <BackgroundEffect theme={settings.theme} />
+
       {/* Main Content Container */}
-      <div className="w-full max-w-6xl flex flex-col md:flex-row items-center md:items-start justify-center gap-6 md:gap-16">
+      <div className="w-full max-w-6xl flex flex-col md:flex-row items-center md:items-start justify-center gap-6 md:gap-16 z-10">
         
         {/* Left Side: Date */}
-        <div className="flex flex-col items-center md:items-end select-none">
+        <div className="flex flex-col items-center md:items-end select-none drop-shadow-lg">
           <motion.span 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -151,7 +174,7 @@ export default function App() {
         </div>
 
         {/* Right Side: Time and Verse */}
-        <div className="flex-1 flex flex-col justify-center max-w-2xl w-full text-center md:text-left">
+        <div className="flex-1 flex flex-col justify-center max-w-2xl w-full text-center md:text-left drop-shadow-md">
           <motion.div 
             className="text-xl md:text-4xl font-medium mb-4 md:mb-8 flex items-center justify-center md:justify-start gap-2"
           >
@@ -183,10 +206,10 @@ export default function App() {
       {/* Settings Toggle Button */}
       <button 
         onClick={toggleSettings}
-        className="absolute top-4 right-4 md:top-8 md:right-8 p-2 rounded-full hover:bg-white/10 transition-colors z-20"
+        className="absolute top-4 right-4 md:top-8 md:right-8 p-2 rounded-full hover:bg-white/20 transition-colors z-20 bg-black/10 backdrop-blur-sm"
         aria-label="Settings"
       >
-        <Settings className="w-5 h-5 md:w-6 md:h-6 opacity-40 hover:opacity-100 transition-opacity" />
+        <Settings className="w-5 h-5 md:w-6 md:h-6 opacity-60 hover:opacity-100 transition-opacity" />
       </button>
 
       {/* Settings Panel Overlay */}
@@ -215,23 +238,47 @@ export default function App() {
               </div>
 
               <div className="space-y-10">
-                {/* Background Color Selection */}
+                {/* Theme Selection */}
                 <div>
-                  <label className="block text-sm font-medium opacity-60 mb-4">배경 색상</label>
-                  <div className="grid grid-cols-4 gap-3">
-                    {BACKGROUND_COLORS.map((color) => (
+                  <label className="flex items-center gap-2 text-sm font-medium opacity-60 mb-4">
+                    <Palette className="w-4 h-4" /> 배경 테마
+                  </label>
+                  <div className="grid grid-cols-2 gap-2">
+                    {THEMES.map((theme) => (
                       <button
-                        key={color.value}
-                        onClick={() => updateSettings({ backgroundColor: color.value, textColor: color.text })}
-                        className={`w-10 h-10 rounded-full border-2 transition-transform hover:scale-110 ${
-                          settings.backgroundColor === color.value ? 'border-blue-500 scale-110' : 'border-transparent'
+                        key={theme.id}
+                        onClick={() => updateSettings({ theme: theme.id })}
+                        className={`py-2 px-3 rounded-md text-sm transition-all ${
+                          settings.theme === theme.id 
+                            ? 'bg-white text-black font-bold' 
+                            : 'bg-white/5 hover:bg-white/10'
                         }`}
-                        style={{ backgroundColor: color.value }}
-                        title={color.name}
-                      />
+                      >
+                        {theme.name}
+                      </button>
                     ))}
                   </div>
                 </div>
+
+                {/* Background Color Selection (Only for Classic) */}
+                {settings.theme === 'classic' && (
+                  <div>
+                    <label className="block text-sm font-medium opacity-60 mb-4">배경 색상</label>
+                    <div className="grid grid-cols-4 gap-3">
+                      {BACKGROUND_COLORS.map((color) => (
+                        <button
+                          key={color.value}
+                          onClick={() => updateSettings({ backgroundColor: color.value, textColor: color.text })}
+                          className={`w-10 h-10 rounded-full border-2 transition-transform hover:scale-110 ${
+                            settings.backgroundColor === color.value ? 'border-blue-500 scale-110' : 'border-transparent'
+                          }`}
+                          style={{ backgroundColor: color.value }}
+                          title={color.name}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )}
 
                 {/* Interval Selection */}
                 <div>
@@ -302,7 +349,7 @@ export default function App() {
 
               <div className="mt-12 pb-8">
                 <p className="text-xs opacity-40 text-center">
-                  Bible Verse Clock v1.2 (1,440 Verses Ready)
+                  Bible Verse Clock v1.3 (Seasonal Themes)
                 </p>
               </div>
             </motion.div>
